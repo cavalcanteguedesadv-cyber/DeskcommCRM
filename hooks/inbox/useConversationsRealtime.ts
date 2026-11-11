@@ -110,6 +110,10 @@ export interface ConversationsFilters {
    * a coluna `unread_count_for_assignee` já existe.
    */
   unread?: boolean;
+  /** Fork Cavalcante & Guedes: só conversas cuja primeira mensagem é deste mês. */
+  chegou_no_mes?: boolean;
+  /** Fork Cavalcante & Guedes: só conversas cuja última mensagem é do cliente. */
+  cliente_por_ultimo?: boolean;
   channel_session_id?: string;
   /**
    * A FILA (#3876): só as conversas classificadas neste setor. O `set` da
@@ -196,6 +200,8 @@ export function useConversationsRealtime(
       if (filters.assigned_to) qs.set("assigned_to", filters.assigned_to);
       if (filters.search) qs.set("search", filters.search);
       if (filters.unread) qs.set("unread", "true");
+      if (filters.chegou_no_mes) qs.set("chegou_no_mes", "true");
+      if (filters.cliente_por_ultimo) qs.set("cliente_por_ultimo", "true");
       if (filters.channel_session_id) qs.set("channel_session_id", filters.channel_session_id);
       // A FILA (#3876) — ver o comentário do campo em `ConversationsFilters`.
       if (filters.sector_id) qs.set("sector_id", filters.sector_id);

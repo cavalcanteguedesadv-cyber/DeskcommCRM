@@ -482,6 +482,8 @@ export function InboxLayout({
       tag: filterValue.tag,
       tagMode: filterValue.tagMode,
       unread: filterValue.onlyUnread || undefined,
+      chegou_no_mes: filterValue.chegouNoMes || undefined,
+      cliente_por_ultimo: filterValue.clienteFalouPorUltimo || undefined,
       is_group: filterValue.onlyGroups || undefined,
     }),
     [
@@ -495,6 +497,8 @@ export function InboxLayout({
       filterValue.tagMode,
       filterValue.onlyUnread,
       filterValue.onlyGroups,
+      filterValue.chegouNoMes,
+      filterValue.clienteFalouPorUltimo,
     ],
   );
 

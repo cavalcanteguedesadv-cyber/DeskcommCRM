@@ -455,6 +455,16 @@ export const listConversationsQuerySchema = z.object({
    */
   unread: z.coerce.boolean().optional(),
   /**
+   * Filtros do escritório (fork Cavalcante & Guedes). `"true"` como STRING, pelo
+   * mesmo motivo de `is_group`: `z.coerce.boolean()` leria `"false"` como `true`.
+   * `chegou_no_mes`: só conversas cuja PRIMEIRA mensagem é deste mês (campo
+   * calculado `primeira_mensagem_em`, migration 9990).
+   * `cliente_por_ultimo`: só conversas cuja última mensagem é do cliente, lida ou
+   * não (campo calculado `cliente_falou_por_ultimo`, migration 9990).
+   */
+  chegou_no_mes: z.enum(["true"]).optional(),
+  cliente_por_ultimo: z.enum(["true"]).optional(),
+  /**
    * O termo de busca. A régua inteira vive em `lib/inbox/termo-de-busca.ts`, e a
    * tela lê a MESMA — repetir aqui faria os dois divergirem, e a divergência
    * apareceria como erro na cara de quem digita (a rota recusa e o hook mostra).

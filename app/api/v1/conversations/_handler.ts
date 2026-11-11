@@ -73,6 +73,31 @@ function idsQueCabemNaURL(ids: string[]): string[] {
   return cabem;
 }
 
+/** Fuso do escritório para "este mês" (fork Cavalcante & Guedes). */
+const FUSO_DO_ESCRITORIO = "America/Sao_Paulo";
+
+/**
+ * O instante (ISO, UTC) em que começou o mês corrente NO FUSO dado.
+ * Calcula o deslocamento pelo próprio `Intl`, sem fixar -03:00 no código.
+ */
+export function inicioDoMesEm(fuso: string, agora: Date): string {
+  const partes = new Intl.DateTimeFormat("en-US", {
+    timeZone: fuso,
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(agora);
+  const ano = Number(partes.find((p) => p.type === "year")?.value);
+  const mes = Number(partes.find((p) => p.type === "month")?.value);
+  const meiaNoiteUtc = Date.UTC(ano, mes - 1, 1, 0, 0, 0);
+  const comoNoFuso = new Date(
+    new Date(meiaNoiteUtc).toLocaleString("en-US", { timeZone: fuso }),
+  ).getTime();
+  const comoEmUtc = new Date(
+    new Date(meiaNoiteUtc).toLocaleString("en-US", { timeZone: "UTC" }),
+  ).getTime();
+  return new Date(meiaNoiteUtc + (comoEmUtc - comoNoFuso)).toISOString();
+}
+
 const SELECT_COLS = `
   id, organization_id, contact_id, channel_session_id, channel, status,
   status_changed_at, service_revision, service_closed_at, service_started_at, current_demanda_id, assigned_to_user_id, assigned_to_user_name, assignee_kind, assigned_at, last_inbound_at, awaiting_since,
@@ -294,6 +319,12 @@ export async function listConversationsHandler(
   // Este handler usa o admin client, que passa por cima da RLS: esse filtro é a Única
   // barreira. Consulta nova só para os não lidos nasceria sem barreira nenhuma.
   if (q.unread) query = query.gt("unread_count_for_assignee", 0);
+  // Filtros do escritório (fork Cavalcante & Guedes). Vão ao BANCO, como o
+  // `unread`, para o cursor e o "carregar mais" continuarem valendo.
+  if (q.chegou_no_mes === "true") {
+    query = query.gte("primeira_mensagem_em", inicioDoMesEm(FUSO_DO_ESCRITORIO, new Date()));
+  }
+  if (q.cliente_por_ultimo === "true") query = query.is("cliente_falou_por_ultimo", true);
 
   if (q.assigned_to === "me") {
     if (ctx.actor.type !== "user") {

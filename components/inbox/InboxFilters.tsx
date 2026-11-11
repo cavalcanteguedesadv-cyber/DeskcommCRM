@@ -80,6 +80,9 @@ export function visibleInboxTabs(role: Role, mode: VisibilityMode | undefined): 
   return INBOX_TABS.filter((t) => !(t.value === "all" && hideAll)).map((t) => t.value);
 }
 
+/** A etiqueta que marca quem já é cliente (a mesma da regra "Clientes pela agenda"). */
+export const ETIQUETA_DE_CLIENTE = "cliente";
+
 export interface InboxFiltersValue {
   tab: InboxTab;
   search: string;
@@ -98,6 +101,10 @@ export interface InboxFiltersValue {
   tagMode?: ModoDeEtiqueta;
   /** A aba "Grupos" (Task 10): manda `is_group=true` na listagem. */
   onlyGroups?: boolean;
+  /** Fork Cavalcante & Guedes: só quem chegou neste mês (primeira mensagem). */
+  chegouNoMes?: boolean;
+  /** Fork Cavalcante & Guedes: só conversas em que o cliente mandou a última mensagem. */
+  clienteFalouPorUltimo?: boolean;
   /**
    * Só as conversas deste atendente (id do usuário). Filtro de GERENTE para cima;
    * ausente = todas. A aba Minhas já é "as minhas", então ali ele não vale.
@@ -560,6 +567,59 @@ export function InboxFilters({ value, onChange, filas: filasDaOrganizacao }: Pro
           >
             {t("Grupos")}
           </button>
+        </div>
+
+        {/* Fork Cavalcante & Guedes: os três atalhos do escritório, numa linha
+            própria (a de cima já está cheia na coluna de 280px). Mesmo padrão
+            visual dos botões "Não lidos" e "Grupos". "Clientes" não é filtro
+            novo: liga e desliga a etiqueta `cliente` no filtro de etiquetas
+            que já existe, então a lista e o seletor de etiquetas concordam. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {(
+            [
+              {
+                rotulo: t("Chegaram no mês"),
+                ativo: value.chegouNoMes ?? false,
+                alternar: () => onChange({ ...value, chegouNoMes: !value.chegouNoMes }),
+              },
+              {
+                rotulo: t("Cliente falou por último"),
+                ativo: value.clienteFalouPorUltimo ?? false,
+                alternar: () =>
+                  onChange({ ...value, clienteFalouPorUltimo: !value.clienteFalouPorUltimo }),
+              },
+              {
+                rotulo: t("Clientes"),
+                ativo: etiquetas.includes(ETIQUETA_DE_CLIENTE),
+                alternar: () => {
+                  const proximas = etiquetas.includes(ETIQUETA_DE_CLIENTE)
+                    ? etiquetas.filter((e) => e !== ETIQUETA_DE_CLIENTE)
+                    : [...etiquetas, ETIQUETA_DE_CLIENTE];
+                  onChange({
+                    ...value,
+                    tag: proximas.length === 0 ? undefined : proximas,
+                    tagMode: proximas.length > 1 ? value.tagMode : undefined,
+                  });
+                },
+              },
+            ] as const
+          ).map((atalho) => (
+            <button
+              key={atalho.rotulo}
+              type="button"
+              aria-pressed={atalho.ativo}
+              onClick={atalho.alternar}
+              className={cn(
+                "h-8 shrink-0 rounded-full border px-3 text-xs font-medium transition-colors",
+                "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                atalho.ativo
+                  ? "border-accent bg-accent text-accent-foreground"
+                  : "border-border bg-transparent text-text-muted hover:bg-surface-elevated",
+              )}
+            >
+              {atalho.rotulo}
+            </button>
+          ))}
         </div>
 
         {(showChannelSwitch || mostrarSeletorDeTag || mostrarSeletorDeAtendente) && (

@@ -2141,6 +2141,8 @@ export const DICIONARIO: Traducoes = {
   "Qualquer uma (OU)": { es: "Cualquiera (O)" },
   "Apenas não lidos": { es: "Solo no leídos" },
   "Não lidos": { es: "No leídos" },
+  "Chegaram no mês": { es: "Llegaron este mes" },
+  "Cliente falou por último": { es: "El cliente habló por último" },
   Grupo: { es: "Grupo" },
   Fila: { es: "Cola" },
   Minhas: { es: "Mías" },
