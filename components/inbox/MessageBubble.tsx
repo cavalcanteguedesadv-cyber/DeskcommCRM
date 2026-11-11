@@ -1,5 +1,6 @@
 "use client";
 
+import { TextoComLinks } from "@/components/inbox/TextoComLinks";
 import { useLocaleDeData } from "@/hooks/i18n/useLocaleDeData";
 import { format } from "date-fns";
 import { useT } from "@/hooks/i18n/useT";
@@ -665,7 +666,10 @@ export function MessageBubble({
             )}
 
             {message.body && !isContact && !localizacao && (
-              <p className="whitespace-pre-wrap wrap-anywhere leading-snug">{corpo}</p>
+              <p className="whitespace-pre-wrap wrap-anywhere leading-snug">
+                {/* Fork Cavalcante & Guedes: links clicáveis, abrindo em aba nova. */}
+                {typeof corpo === "string" ? <TextoComLinks texto={corpo} /> : corpo}
+              </p>
             )}
 
             {botoesDoModelo.length > 0 && (

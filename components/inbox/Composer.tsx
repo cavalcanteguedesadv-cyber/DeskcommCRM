@@ -66,6 +66,12 @@ import type { Message } from "@/lib/types/messaging";
 
 export interface ComposerHandle {
   focus: () => void;
+  /**
+   * Fork Cavalcante & Guedes: arquivo solto no MEIO da conversa (não só no
+   * compositor). Entra pela mesma guarda e pela mesma fila do botão de anexar;
+   * devolve `false` quando a caixa está travada e o arquivo foi recusado.
+   */
+  receberArquivos: (arquivos: File[]) => boolean;
 }
 
 /**
@@ -347,6 +353,11 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
 
   useImperativeHandle(ref, () => ({
     focus: () => taRef.current?.focus(),
+    receberArquivos: (arquivos: File[]) => {
+      if (!aceitaArquivoArrastadoRef.current || arquivos.length === 0) return false;
+      escolherArquivosRef.current(arquivos);
+      return true;
+    },
   }));
 
   // send/createNote fora do disable: o texto some na hora do envio; travar o campo
@@ -371,6 +382,11 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
    * `disabled` não impede um arquivo de ser solto em cima do compositor.
    */
   const aceitaArquivoArrastado = !respostaBarrada && pendingFiles.length === 0;
+  // Fork C&G: o handle lê sempre o valor da renderização atual.
+  const aceitaArquivoArrastadoRef = useRef(aceitaArquivoArrastado);
+  aceitaArquivoArrastadoRef.current = aceitaArquivoArrastado;
+  const escolherArquivosRef = useRef<(files: File[]) => void>(() => {});
+  escolherArquivosRef.current = escolherArquivos;
 
   /**
    * O RASCUNHO QUE JÁ ESTÁ NO CAMPO (#3354).

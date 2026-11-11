@@ -233,7 +233,7 @@ describe("a lista do inbox consulta UMA vez quando o filtro efetivo muda (#2365)
     await entregar(AUTOMATICO, { data: { ativo: true } });
 
     await waitFor(() => expect(listas()).toHaveLength(1));
-    expect(comando(unicaLista().url)).toBe("aguardando,ninguem");
+    expect(comando(unicaLista().url)).toBe("aguardando,ninguem,automatico");
 
     await assentar();
     expect(listas()).toHaveLength(1);

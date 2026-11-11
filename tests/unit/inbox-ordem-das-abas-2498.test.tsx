@@ -3,7 +3,7 @@
  *
  * ─── O defeito ─────────────────────────────────────────────────────────────
  *
- * "Automático" ficava FORA da faixa, no fim dela, depois de "Arquivadas" — o
+ * "Com a IA" ficava FORA da faixa, no fim dela, depois de "Arquivadas" — o
  * valor que o operador mais olha era o último, atrás de dois passados. A ordem
  * pedida pela issue é a do trabalho: primeiro o que o robô conduz, depois a
  * fila de quem precisa de gente, depois o histórico.
@@ -16,7 +16,7 @@
  *
  *   - rótulos e `value` — um valor novo nasceria `?filter=` que a rota não lê;
  *   - permissões (`visibleInboxTabs`) — reordenar filtrando de novo esconderia
- *     "Todas" de quem tem direito a vê-la;
+ *     "Em aberto" de quem tem direito a vê-la;
  *   - contadores — o badge lê `counts` por CHAVE (`fila`, `automatico`, …), e
  *     a ordem nova não muda quem conta o quê;
  *   - as seis na mesma quantidade — uma aba perdida na remontagem do array não
@@ -46,7 +46,7 @@ vi.mock("@/hooks/contacts/useContactTagVocabulary", () => ({
   useContactTagVocabulary: () => ({ data: [] }),
 }));
 // Uma contagem POR ABA, para o caso de contadores poder acusar uma troca de
-// chave: `automatico` é a da "Automático", `fila` é a da "Fila".
+// chave: `automatico` é a da "Com a IA", `fila` é a da "Entrada".
 vi.mock("@/hooks/inbox/useConversationCounts", () => ({
   useConversationCounts: () => ({
     data: { fila: 3, mine: 2, all: 5, automatico: 7, closed: 4, archived: 1 },
@@ -71,10 +71,10 @@ describe("as seis abas, na ordem pedida pela #2498", () => {
   it("Automático, Fila, Minhas, Todas, Fechadas, Arquivadas — nessa ordem", () => {
     render(<InboxFilters value={VALUE} onChange={() => {}} />);
     expect(abasRenderizadas()).toEqual([
-      "Automático",
-      "Fila",
+      "Com a IA",
+      "Entrada",
       "Minhas",
-      "Todas",
+      "Em aberto",
       "Fechadas",
       "Arquivadas",
     ]);
@@ -91,10 +91,10 @@ describe("as seis abas, na ordem pedida pela #2498", () => {
       ([, value, label]) => `${value}=${label}`,
     );
     expect(pares).toEqual([
-      "ai=Automático",
-      "unassigned=Fila",
+      "ai=Com a IA",
+      "unassigned=Entrada",
       "mine=Minhas",
-      "all=Todas",
+      "all=Em aberto",
       "closed=Fechadas",
       "archived=Arquivadas",
     ]);
@@ -102,10 +102,10 @@ describe("as seis abas, na ordem pedida pela #2498", () => {
 
   it("cada aba continua com o SEU contador (nada trocou de chave)", () => {
     render(<InboxFilters value={VALUE} onChange={() => {}} />);
-    expect(screen.getByRole("tab", { name: /^Automático/ })).toHaveTextContent("7");
-    expect(screen.getByRole("tab", { name: /^Fila/ })).toHaveTextContent("3");
+    expect(screen.getByRole("tab", { name: /^Com a IA/ })).toHaveTextContent("7");
+    expect(screen.getByRole("tab", { name: /^Entrada/ })).toHaveTextContent("3");
     expect(screen.getByRole("tab", { name: /^Minhas/ })).toHaveTextContent("2");
-    expect(screen.getByRole("tab", { name: /^Todas/ })).toHaveTextContent("5");
+    expect(screen.getByRole("tab", { name: /^Em aberto/ })).toHaveTextContent("5");
     expect(screen.getByRole("tab", { name: /^Fechadas/ })).toHaveTextContent("4");
     expect(screen.getByRole("tab", { name: /^Arquivadas/ })).toHaveTextContent("1");
   });

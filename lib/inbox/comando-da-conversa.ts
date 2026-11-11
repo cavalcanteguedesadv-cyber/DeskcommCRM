@@ -500,6 +500,18 @@ export function comandosDaFila(automaticoDaOrg?: boolean): ComandoDoBanco[] {
 }
 
 /**
+ * Fork Cavalcante & Guedes — a aba "Entrada" do Inbox (antes "Fila").
+ *
+ * Todo cliente SEM pessoa da equipe como dono fica nela, inclusive enquanto a IA
+ * conduz, como a fila de entrada do Digisac. É a régua da LISTA e do CONTADOR
+ * dessa aba; o Painel de atendimento continua com `comandosDaFila`, que pergunta
+ * outra coisa (quem espera uma PESSOA agora).
+ */
+export function comandosDaEntrada(): ComandoDoBanco[] {
+  return ["aguardando", "ninguem", "automatico"];
+}
+
+/**
  * A ORDEM DA FILA, num lugar só — mais tempo esperando primeiro.
  *
  * ─── A régua é a mensagem mais ANTIGA sem resposta, não a última (issue #990) ─

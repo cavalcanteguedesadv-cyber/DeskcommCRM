@@ -46,7 +46,7 @@ import { CaretLeft, ChatCircle, IdentificationCard, MagnifyingGlass, X } from "@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { comandosDaFila } from "@/lib/inbox/comando-da-conversa";
+import { comandosDaEntrada } from "@/lib/inbox/comando-da-conversa";
 import { togglePainelDoContato } from "@/app/actions/inbox/togglePainelDoContato";
 import type { AvisoDeRascunho } from "@/lib/inbox/rascunho-sugerido";
 import { buscaValeConsulta } from "@/lib/inbox/termo-de-busca";
@@ -200,7 +200,9 @@ export function tabToFilter(
       //
       // `comandosDaFila` é quem cruza isso com o fato org-wide: numa instalação
       // sem nenhum agente no ar, `automatico` também é "esperando gente".
-      return { comando: comandosDaFila(automaticoDaOrg) };
+      // Fork C&G: a aba é a "Entrada" — todo cliente sem pessoa como dono.
+      void automaticoDaOrg;
+      return { comando: comandosDaEntrada() };
     case "mine":
       // Sem `exclude_finished` a aba mostra tudo que o atendente JÁ atendeu —
       // `Fechar` muda o status mas não solta o dono (de propósito: quem atendeu
@@ -1111,7 +1113,21 @@ export function InboxLayout({
                 </Button>
               </div>
             )}
-            <div className="min-h-0 flex-1 overflow-hidden">
+            <div
+              className="min-h-0 flex-1 overflow-hidden"
+              // Fork Cavalcante & Guedes: soltar imagem, documento ou áudio no
+              // MEIO da conversa anexa como o botão "+". Quem decide se aceita é
+              // o compositor (mesma guarda, mesma prévia, mesmo envio).
+              onDragOver={(e) => {
+                if (Array.from(e.dataTransfer?.types ?? []).includes("Files")) e.preventDefault();
+              }}
+              onDrop={(e) => {
+                const arquivos = Array.from(e.dataTransfer?.files ?? []);
+                if (arquivos.length === 0) return;
+                e.preventDefault();
+                composerRef.current?.receberArquivos(arquivos);
+              }}
+            >
               <ChatThread
                 conversationId={selectedConversation.id}
                 searchTerm={buscaAberta ? busca.termo : ""}

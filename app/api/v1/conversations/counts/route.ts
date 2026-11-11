@@ -17,7 +17,7 @@ import { orgAtivaDaApi } from "@/lib/auth/require-role";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { CONVERSATION_TERMINAL_STATUSES } from "@/lib/schemas";
 import { orgTemAutomatico } from "@/lib/ai/agents/org-tem-automatico";
-import { comandosDaFila, comPreFiltroDoComando } from "@/lib/inbox/comando-da-conversa";
+import { comandosDaEntrada, comPreFiltroDoComando } from "@/lib/inbox/comando-da-conversa";
 import { aplicarMarcadores, modoDeEtiqueta } from "@/lib/inbox/marcador-da-conversa";
 import { createClient } from "@/lib/supabase/server";
 import { idsDeContatosPessoais } from "../_handler";
@@ -158,7 +158,9 @@ export async function GET(req: NextRequest): Promise<Response> {
   // O conjunto de comandos que a aba Fila pede sai daqui UMA vez e serve às duas
   // pontas: o `.in(...)` da contagem e o pré-filtro (#4325), que só vale quando
   // todos os comandos pedidos são `aguardando`/`automatico`.
-  const comandosFila = comandosDaFila(automaticoDaOrg);
+  // Fork C&G: o contador da aba "Entrada" usa a MESMA régua da lista.
+  void automaticoDaOrg;
+  const comandosFila = comandosDaEntrada();
 
   // O badge de "Minhas" precisa contar o MESMO que a aba lista (#2848): a aba
   // passou a trazer as conversas em que eu PARTICIPO (convite é da conversa), e
@@ -264,7 +266,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     idsDasFilas.map(async (idDaFila) => {
       const r = await countExact([...semOFiltroDaTela, ["sector_id", idDaFila] as const]).in(
         "comando_da_conversa",
-        comandosDaFila(automaticoDaOrg),
+        comandosDaEntrada(),
       );
       // Falha de UMA fila não derruba a tela: a contagem dela sai zero, que é
       // menos ruim que o inbox inteiro sem número. O erro real já vai ao log da

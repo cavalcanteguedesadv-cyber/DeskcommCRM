@@ -2142,6 +2142,7 @@ export const DICIONARIO: Traducoes = {
   "Apenas não lidos": { es: "Solo no leídos" },
   "Não lidos": { es: "No leídos" },
   "Chegaram no mês": { es: "Llegaron este mes" },
+  "Com a IA": { es: "Con la IA" },
   "Cliente falou por último": { es: "El cliente habló por último" },
   Grupo: { es: "Grupo" },
   Fila: { es: "Cola" },

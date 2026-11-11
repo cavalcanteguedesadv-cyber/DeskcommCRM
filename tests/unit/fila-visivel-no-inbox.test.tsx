@@ -114,7 +114,7 @@ describe("#3876 — a contagem por fila", () => {
     const rota = fonte("app/api/v1/conversations/counts/route.ts");
     expect(rota).toMatch(/por_fila: Object\.fromEntries\(contagensPorFila\)/);
     expect(rota).toMatch(/countExact\(\[\.\.\.semOFiltroDaTela, \["sector_id", idDaFila\] as const\]\)/);
-    expect(rota).toMatch(/comandosDaFila\(automaticoDaOrg\)/);
+    expect(rota).toMatch(/comandosDaEntrada\(\)/);
     // O filtro da TELA não pode entrar na contagem POR fila: `sector_id = A AND
     // sector_id = B` zeraria todas as filas menos uma.
     expect(rota).toMatch(/auxiliares\.filter\(\(\[coluna\]\) => coluna !== "sector_id"\)/);

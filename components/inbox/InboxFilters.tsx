@@ -51,16 +51,19 @@ export type InboxTab = "unassigned" | "mine" | "all" | "closed" | "archived" | "
  * por chave, e a chave não acompanha a posição). `moveTab` anda pelo MESMO
  * array, então as setas continuam vizinha a vizinha.
  */
+// Fork Cavalcante & Guedes: rótulos no vocabulário do escritório (Digisac).
+// "Entrada" = todo cliente sem pessoa da equipe como dono; "Em aberto" = toda
+// conversa não fechada; "Com a IA" = só as que a IA conduz agora.
 const INBOX_TABS: { value: InboxTab; label: string }[] = [
   // "Automático", não "IA": a palavra deste ator já é contrato em quatro arquivos
   // e no dicionário, e `handoff-por-orcamento.test.ts` usa literalmente "Voltar
   // para a IA" como a sabotagem que deve reprovar. O rótulo não mudou quando o
   // significado mudou (deixou de filtrar `ai_handling` e passou a perguntar a
   // régua do motor) — e a posição sim: ela era a última fora do padrão.
-  { value: "ai", label: "Automático" },
-  { value: "unassigned", label: "Fila" },
+  { value: "ai", label: "Com a IA" },
+  { value: "unassigned", label: "Entrada" },
   { value: "mine", label: "Minhas" },
-  { value: "all", label: "Todas" },
+  { value: "all", label: "Em aberto" },
   { value: "closed", label: "Fechadas" },
   // "Arquivadas" fica ao lado de "Fechadas" porque as duas são passado — e
   // separada dela porque são passados diferentes (#923): fechada é atendimento

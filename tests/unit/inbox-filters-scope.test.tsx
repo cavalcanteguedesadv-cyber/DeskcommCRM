@@ -103,7 +103,7 @@ describe("visibleInboxTabs (lógica pura de visões)", () => {
   it("admin sempre vê 'all'", () => {
     expect(visibleInboxTabs("admin", "own")).toContain("all");
   });
-  it("as 3 visões nomeadas existem (Minhas/Fila/Todas) para manager", () => {
+  it("as 3 visões nomeadas existem (Minhas/Entrada/Em aberto) para manager", () => {
     const tabs = visibleInboxTabs("manager", "own_and_unassigned");
     expect(tabs).toEqual(expect.arrayContaining(["mine", "unassigned", "all"]));
   });
@@ -128,7 +128,7 @@ describe("InboxFilters render — 3 visões + escopo", () => {
       Object.defineProperty(list, "clientWidth", { configurable: true, get: () => width });
       Object.defineProperty(list, "scrollWidth", { configurable: true, value: 520 });
       vi.spyOn(list, "getBoundingClientRect").mockReturnValue({ left: 0 } as DOMRect);
-      const all = screen.getByRole("tab", { name: /Todas/ });
+      const all = screen.getByRole("tab", { name: /Em aberto/ });
       Object.defineProperty(all, "offsetWidth", { configurable: true, value: 40 });
       vi.spyOn(all, "getBoundingClientRect").mockImplementation(
         () => ({ left: 210 - list.scrollLeft }) as DOMRect,
@@ -164,22 +164,22 @@ describe("InboxFilters render — 3 visões + escopo", () => {
     setOrg("agent", "own_and_unassigned");
     render(<InboxFilters value={VALUE} onChange={() => {}} />);
     expect(screen.getByRole("tab", { name: /Minhas/ })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Fila/ })).toBeInTheDocument();
-    expect(screen.queryByRole("tab", { name: /Todas/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Entrada/ })).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /Em aberto/ })).not.toBeInTheDocument();
   });
 
   it("manager: mostra Todas", () => {
     setOrg("manager", "own_and_unassigned");
     render(<InboxFilters value={VALUE} onChange={() => {}} />);
-    expect(screen.getByRole("tab", { name: /Todas/ })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Em aberto/ })).toBeInTheDocument();
   });
 
   it("contagens por visão são renderizadas (Fila=3, Minhas=2)", () => {
     setOrg("manager", "all");
     render(<InboxFilters value={VALUE} onChange={() => {}} />);
-    expect(screen.getByRole("tab", { name: /Fila/ })).toHaveTextContent("3");
+    expect(screen.getByRole("tab", { name: /Entrada/ })).toHaveTextContent("3");
     expect(screen.getByRole("tab", { name: /Minhas/ })).toHaveTextContent("2");
-    expect(screen.getByRole("tab", { name: /Todas/ })).toHaveTextContent("5");
+    expect(screen.getByRole("tab", { name: /Em aberto/ })).toHaveTextContent("5");
   });
 });
 

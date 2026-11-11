@@ -31,7 +31,7 @@
  * compila o Tailwind inteiro), e a regressão específica — alguém tirar
  * `flex-wrap` da faixa "para voltar ao visual de uma linha só" — é textual e
  * barata de pegar. O segundo bloco vigia o outro lado do mesmo defeito: a
- * saída fácil seria encurtar rótulo ou tirar aba, e "Automático" é contrato
+ * saída fácil seria encurtar rótulo ou tirar aba, e "Com a IA" é contrato
  * (comentário em `InboxFilters.tsx`) — a largura não se paga mudando o
  * significado do filtro.
  */
@@ -106,7 +106,7 @@ describe("faixa da Inbox — quebra em vez de esconder aba (#2745)", () => {
     // catraca de classe continua verde com a tela errada.
     const abas = screen.getAllByRole("tab");
     expect(abas).toHaveLength(6);
-    for (const rotulo of ["Automático", "Fila", "Minhas", "Todas", "Fechadas", "Arquivadas"]) {
+    for (const rotulo of ["Com a IA", "Entrada", "Minhas", "Em aberto", "Fechadas", "Arquivadas"]) {
       expect(
         screen.getByRole("tab", { name: new RegExp(rotulo) }),
         `a aba "${rotulo}" não está na faixa`,
@@ -136,10 +136,10 @@ describe("faixa da Inbox — quebra em vez de esconder aba (#2745)", () => {
       "archived",
     ]);
     expect(screen.getAllByRole("tab").map((a) => a.textContent?.replace(/\s+/g, ""))).toEqual([
-      "Automático12",
-      "Fila47",
+      "ComaIA12",
+      "Entrada47",
       "Minhas8",
-      "Todas130",
+      "Emaberto130",
       "Fechadas25",
       "Arquivadas9",
     ]);

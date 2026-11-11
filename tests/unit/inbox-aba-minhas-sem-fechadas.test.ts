@@ -50,7 +50,7 @@ describe("tabToFilter — o que cada aba significa", () => {
     // não tem robô por trás, e essa conversa espera uma pessoa em QUALQUER
     // organização — inclusive na que tem agente, quando o agente não é daquele
     // número. Deixá-la fora trocaria a mentira por um sumiço.
-    expect(tabToFilter("unassigned")).toEqual({ comando: ["aguardando", "ninguem"] });
+    expect(tabToFilter("unassigned")).toEqual({ comando: ["aguardando", "ninguem", "automatico"] });
   });
 
   it("numa org SEM automático, a Fila também traz o que ninguém está atendendo", () => {
