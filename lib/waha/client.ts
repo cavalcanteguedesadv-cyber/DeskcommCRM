@@ -576,6 +576,23 @@ export class WahaClient {
    * terminam em `@g.us`, e é essa a única checagem — não `18 dígitos`.
    */
   async listarGrupos(session: string): Promise<Array<{ chatId: string; subject: string | null }>> {
+    const grupos = await this.lerGrupos(session);
+    if (grupos.length > 0) return grupos;
+    // Fork C&G: no NOWEB a lista de grupos pode vir vazia até o WAHA buscar os
+    // grupos no servidor do WhatsApp. Pede essa busca uma vez e lê de novo. Se
+    // o WAHA não tiver a rota, segue com a lista vazia, como antes.
+    try {
+      await this.fetchComTeto(`${this.baseUrl}/api/${encodeURIComponent(session)}/groups/refresh`, {
+        method: "POST",
+        headers: { "X-Api-Key": this.apiKey },
+      }, 30_000);
+    } catch {
+      return grupos;
+    }
+    return this.lerGrupos(session);
+  }
+
+  private async lerGrupos(session: string): Promise<Array<{ chatId: string; subject: string | null }>> {
     const res = await this.fetchComTeto(`${this.baseUrl}/api/${encodeURIComponent(session)}/groups`, {
       headers: { "X-Api-Key": this.apiKey },
     });
