@@ -75,7 +75,8 @@ describe("tabToFilter — o que cada aba significa", () => {
 
   it("as outras abas não ganham o filtro de tabela", () => {
     expect(tabToFilter("unassigned").exclude_finished).toBeUndefined();
-    expect(tabToFilter("all").exclude_finished).toBeUndefined();
+    // Fork C&G: "Em aberto" (all) esconde fechadas e arquivadas.
+    expect(tabToFilter("all").exclude_finished).toBe(true);
     expect(tabToFilter("ai").exclude_finished).toBeUndefined();
   });
 });

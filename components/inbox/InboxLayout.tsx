@@ -225,6 +225,9 @@ export function tabToFilter(
       // atendia 47. Agora ela pergunta a régua do MOTOR.
       return { comando: ["automatico"] };
     case "all":
+      // Fork C&G: a aba é "Em aberto" — todo cliente que ainda não foi
+      // fechado nem arquivado. Fechadas e Arquivadas têm aba própria.
+      return { exclude_finished: true };
     default:
       return {};
   }
