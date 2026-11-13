@@ -106,7 +106,7 @@ describe("faixa da Inbox — quebra em vez de esconder aba (#2745)", () => {
     // catraca de classe continua verde com a tela errada.
     const abas = screen.getAllByRole("tab");
     expect(abas).toHaveLength(6);
-    for (const rotulo of ["Com a IA", "Entrada", "Minhas", "Em aberto", "Fechadas", "Arquivadas"]) {
+    for (const rotulo of ["Com a IA", "Entrada", "Minhas", "Em aberto", "Fechadas", "Todos"]) {
       expect(
         screen.getByRole("tab", { name: new RegExp(rotulo) }),
         `a aba "${rotulo}" não está na faixa`,
@@ -119,7 +119,7 @@ describe("faixa da Inbox — quebra em vez de esconder aba (#2745)", () => {
     render(<InboxFilters value={VALUE} onChange={onChange} />);
     // A quebra é de layout; o valor continua o MESMO contrato de antes.
     // O Radix `TabsTrigger` aciona no `mousedown`, não no `click`.
-    fireEvent.mouseDown(screen.getByRole("tab", { name: /Arquivadas/ }));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: /Todos/ }));
     expect(onChange).toHaveBeenCalledWith({ ...VALUE, tab: "archived" });
   });
 
@@ -141,7 +141,7 @@ describe("faixa da Inbox — quebra em vez de esconder aba (#2745)", () => {
       "Minhas8",
       "Emaberto130",
       "Fechadas25",
-      "Arquivadas9",
+      "Todos9",
     ]);
   });
 });

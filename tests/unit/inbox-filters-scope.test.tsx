@@ -144,7 +144,7 @@ describe("InboxFilters render — 3 visões + escopo", () => {
       act(() => onResize([], {} as ResizeObserver));
       expect(list.scrollLeft).toBe(100);
 
-      const archived = screen.getByRole("tab", { name: /Arquivadas/ });
+      const archived = screen.getByRole("tab", { name: /Todos/ });
       Object.defineProperty(archived, "offsetWidth", { configurable: true, value: 60 });
       vi.spyOn(archived, "getBoundingClientRect").mockImplementation(
         () => ({ left: 430 - list.scrollLeft }) as DOMRect,
@@ -153,7 +153,7 @@ describe("InboxFilters render — 3 visões + escopo", () => {
       expect(list.scrollLeft).toBe(260);
       expect(screen.getByRole("button", { name: "Aba anterior" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Próxima aba" })).not.toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /Arquivadas/ })).toHaveAttribute("data-state", "active");
+      expect(screen.getByRole("tab", { name: /Todos/ })).toHaveAttribute("data-state", "active");
     } finally {
       vi.unstubAllGlobals();
     }

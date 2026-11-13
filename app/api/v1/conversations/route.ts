@@ -71,6 +71,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     // Filtros do escritório (fork Cavalcante & Guedes) — ver o schema.
     chegou_no_mes: url.searchParams.get("chegou_no_mes") ?? undefined,
     cliente_por_ultimo: url.searchParams.get("cliente_por_ultimo") ?? undefined,
+    ordem: url.searchParams.get("ordem") ?? undefined,
     channel_session_id: url.searchParams.get("channel_session_id") ?? undefined,
     // A FILA (#3876). Mesma cerca das linhas de cima: schema, hook, handler e
     // ESTA leitura — esquecer aqui é invisível para todo gate de tipo e a lista

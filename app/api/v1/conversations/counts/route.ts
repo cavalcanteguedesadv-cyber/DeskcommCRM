@@ -237,7 +237,8 @@ export async function GET(req: NextRequest): Promise<Response> {
     // A aba "Arquivadas" (#923): a pasta do histórico, separada de "Fechadas"
     // para que arquivar seja reversível e auditável sem se confundir com o
     // encerramento do atendimento.
-    countExact().eq("status", "archived"),
+    // Fork C&G: a aba "Arquivadas" virou "Todos" — conta tudo.
+    countExact(),
   ]);
 
   // ─── A CONTAGEM POR FILA (#3876) ──────────────────────────────────────────

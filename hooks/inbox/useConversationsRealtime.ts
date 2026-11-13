@@ -114,6 +114,8 @@ export interface ConversationsFilters {
   chegou_no_mes?: boolean;
   /** Fork Cavalcante & Guedes: só conversas cuja última mensagem é do cliente. */
   cliente_por_ultimo?: boolean;
+  /** Fork C&G: ordem da lista pela última mensagem. */
+  ordem?: "recentes" | "antigas";
   channel_session_id?: string;
   /**
    * A FILA (#3876): só as conversas classificadas neste setor. O `set` da
@@ -202,6 +204,7 @@ export function useConversationsRealtime(
       if (filters.unread) qs.set("unread", "true");
       if (filters.chegou_no_mes) qs.set("chegou_no_mes", "true");
       if (filters.cliente_por_ultimo) qs.set("cliente_por_ultimo", "true");
+      if (filters.ordem) qs.set("ordem", filters.ordem);
       if (filters.channel_session_id) qs.set("channel_session_id", filters.channel_session_id);
       // A FILA (#3876) — ver o comentário do campo em `ConversationsFilters`.
       if (filters.sector_id) qs.set("sector_id", filters.sector_id);

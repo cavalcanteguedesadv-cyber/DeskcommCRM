@@ -211,14 +211,9 @@ export function tabToFilter(
     case "closed":
       return { status: "closed" };
     case "archived":
-      // O ARQUIVO É UM ESTADO SÓ ELE, não `in(terminais)`.
-      //
-      // `CONVERSATION_TERMINAL_STATUSES` responde outra pergunta ("o que sai do
-      // fluxo vivo", usada pelo `exclude_finished` de Minhas). Reaproveitá-la
-      // aqui faria a aba Arquivadas listar também as fechadas — duas abas com a
-      // mesma lista e badges diferentes, que é a mentira de tela que o mapa
-      // abaixo existe para impedir.
-      return { status: "archived" };
+      // Fork C&G: a aba virou "Todos" — toda conversa, aberta ou fechada, na
+      // ordem do WhatsApp (a última mensagem manda).
+      return {};
     case "ai":
       // `ai_handling` é escrito por UM caminho só em produção (a volta pelo botão
       // "Devolver ao automático"), então a aba vivia mostrando 2 enquanto o robô
@@ -489,6 +484,7 @@ export function InboxLayout({
       unread: filterValue.onlyUnread || undefined,
       chegou_no_mes: filterValue.chegouNoMes || undefined,
       cliente_por_ultimo: filterValue.clienteFalouPorUltimo || undefined,
+      ordem: filterValue.ordemAntigas ? "antigas" : "recentes",
       is_group: filterValue.onlyGroups || undefined,
     }),
     [
@@ -504,6 +500,7 @@ export function InboxLayout({
       filterValue.onlyGroups,
       filterValue.chegouNoMes,
       filterValue.clienteFalouPorUltimo,
+      filterValue.ordemAntigas,
     ],
   );
 

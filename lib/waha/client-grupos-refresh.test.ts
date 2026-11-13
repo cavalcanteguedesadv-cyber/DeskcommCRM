@@ -12,6 +12,9 @@ let base = "";
 let atualizado = false;
 let refreshes = 0;
 let refreshExiste = true;
+/** Fork C&G: com `ignore.groups` ligado o NOWEB não guarda grupo, nem depois da busca. */
+let ignoraGrupos = false;
+let puts = 0;
 
 beforeAll(async () => {
   server = createServer((req, res) => {
@@ -22,8 +25,23 @@ beforeAll(async () => {
         return res.end("{}");
       }
       refreshes++;
-      atualizado = true;
+      if (!ignoraGrupos) atualizado = true;
       return res.end("{}");
+    }
+    if (req.url === "/api/sessions/s1" && req.method === "GET") {
+      return res.end(
+        JSON.stringify({ name: "s1", status: "WORKING", config: { ignore: { status: true, groups: ignoraGrupos } } }),
+      );
+    }
+    if (req.url === "/api/sessions/s1" && req.method === "PUT") {
+      let corpo = "";
+      req.on("data", (c) => (corpo += c));
+      req.on("end", () => {
+        puts++;
+        ignoraGrupos = JSON.parse(corpo).config.ignore.groups === true;
+        res.end("{}");
+      });
+      return;
     }
     if (req.url === "/api/s1/groups") {
       return res.end(
@@ -43,6 +61,8 @@ beforeEach(() => {
   atualizado = false;
   refreshes = 0;
   refreshExiste = true;
+  ignoraGrupos = false;
+  puts = 0;
 });
 
 describe("listarGrupos com a lista do NOWEB ainda vazia", () => {
@@ -61,5 +81,14 @@ describe("listarGrupos com a lista do NOWEB ainda vazia", () => {
   it("sem a rota de busca no WAHA, segue com a lista vazia", async () => {
     refreshExiste = false;
     expect(await new WahaClient(base, "k").listarGrupos("s1")).toEqual([]);
+  });
+
+  it("com o filtro de grupos ligado, desliga o filtro e busca de novo", async () => {
+    ignoraGrupos = true;
+    const grupos = await new WahaClient(base, "k").listarGrupos("s1");
+    expect(puts).toBe(1);
+    expect(ignoraGrupos).toBe(false);
+    expect(refreshes).toBe(2);
+    expect(grupos).toHaveLength(1);
   });
 });

@@ -76,7 +76,7 @@ describe("as seis abas, na ordem pedida pela #2498", () => {
       "Minhas",
       "Em aberto",
       "Fechadas",
-      "Arquivadas",
+      "Todos",
     ]);
   });
 
@@ -96,7 +96,7 @@ describe("as seis abas, na ordem pedida pela #2498", () => {
       "mine=Minhas",
       "all=Em aberto",
       "closed=Fechadas",
-      "archived=Arquivadas",
+      "archived=Todos",
     ]);
   });
 
@@ -107,7 +107,7 @@ describe("as seis abas, na ordem pedida pela #2498", () => {
     expect(screen.getByRole("tab", { name: /^Minhas/ })).toHaveTextContent("2");
     expect(screen.getByRole("tab", { name: /^Em aberto/ })).toHaveTextContent("5");
     expect(screen.getByRole("tab", { name: /^Fechadas/ })).toHaveTextContent("4");
-    expect(screen.getByRole("tab", { name: /^Arquivadas/ })).toHaveTextContent("1");
+    expect(screen.getByRole("tab", { name: /^Todos/ })).toHaveTextContent("1");
   });
 });
 

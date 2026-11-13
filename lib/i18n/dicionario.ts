@@ -2740,6 +2740,8 @@ export const DICIONARIO: Traducoes = {
   Status: { es: "Estado" },
   status: { es: "estado" },
   Todos: { es: "Todos" },
+  "Mais antigas primeiro": { es: "Más antiguas primero" },
+  "Mais recentes primeiro": { es: "Más recientes primero" },
   Publicado: { es: "Publicado" },
   Rascunho: { es: "Borrador" },
   Pausado: { es: "Pausado" },

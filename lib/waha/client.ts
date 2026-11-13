@@ -581,15 +581,33 @@ export class WahaClient {
     // Fork C&G: no NOWEB a lista de grupos pode vir vazia até o WAHA buscar os
     // grupos no servidor do WhatsApp. Pede essa busca uma vez e lê de novo. Se
     // o WAHA não tiver a rota, segue com a lista vazia, como antes.
+    if (!(await this.pedirBuscaDeGrupos(session))) return grupos;
+    const depoisDaBusca = await this.lerGrupos(session);
+    if (depoisDaBusca.length > 0) return depoisDaBusca;
+    // Medido na VPS (12/11/2026): com `ignore.groups` ligado o NOWEB não guarda
+    // grupo nenhum, e a busca não muda isso. Só que é ligar um grupo na tela que
+    // desliga esse filtro, e a tela não tem grupo para ligar. Desliga o filtro
+    // aqui (grupo não ligado continua descartado na entrada, `lib/grupos/ingest.ts`)
+    // e busca de novo.
     try {
-      await this.fetchComTeto(`${this.baseUrl}/api/${encodeURIComponent(session)}/groups/refresh`, {
+      if (!(await this.definirRecebimentoDeGrupos(session, true))) return depoisDaBusca;
+    } catch {
+      return depoisDaBusca;
+    }
+    if (!(await this.pedirBuscaDeGrupos(session))) return depoisDaBusca;
+    return this.lerGrupos(session);
+  }
+
+  private async pedirBuscaDeGrupos(session: string): Promise<boolean> {
+    try {
+      const r = await this.fetchComTeto(`${this.baseUrl}/api/${encodeURIComponent(session)}/groups/refresh`, {
         method: "POST",
         headers: { "X-Api-Key": this.apiKey },
       }, 30_000);
+      return r.ok;
     } catch {
-      return grupos;
+      return false;
     }
-    return this.lerGrupos(session);
   }
 
   private async lerGrupos(session: string): Promise<Array<{ chatId: string; subject: string | null }>> {

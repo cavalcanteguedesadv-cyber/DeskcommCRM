@@ -205,15 +205,17 @@ export async function listConversationsHandler(
   // a ordenação por tempo de espera sumiria **sem nenhum sintoma na tela**: a
   // lista continuaria populada, só que ordenada por atividade recente, e quem
   // espera desde ontem afundaria embaixo de quem escreveu agora.
-  const isQueue = ehAFila(q);
+  // Fork C&G: quem escolhe "mais recentes" ou "mais antigas" na barra manda na
+  // ordem de qualquer aba, inclusive a Entrada.
+  const isQueue = ehAFila(q) && !q.ordem;
   // A régua da Fila não se escreve aqui: vem de `ORDEM_DA_ESPERA`, a mesma que
   // numera a posição da linha na tela e o número que o cliente ouve. Enquanto
   // cada lugar tinha a sua cópia, trocar uma só fazia a lista ordenar por uma
   // pergunta e a posição responder outra — sem sintoma nenhum, porque as duas
   // telas continuam populadas e plausíveis.
   const sortCol = isQueue ? ORDEM_DA_ESPERA.coluna : "last_message_at";
-  const ordem = isQueue ? ORDEM_DA_ESPERA.opcoes : ({ ascending: false, nullsFirst: false } as const);
-  const asc = isQueue;
+  const asc = isQueue || q.ordem === "antigas";
+  const ordem = isQueue ? ORDEM_DA_ESPERA.opcoes : { ascending: asc, nullsFirst: false };
 
   let query = supabase
     .from("conversations")

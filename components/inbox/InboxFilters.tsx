@@ -65,10 +65,9 @@ const INBOX_TABS: { value: InboxTab; label: string }[] = [
   { value: "mine", label: "Minhas" },
   { value: "all", label: "Em aberto" },
   { value: "closed", label: "Fechadas" },
-  // "Arquivadas" fica ao lado de "Fechadas" porque as duas são passado — e
-  // separada dela porque são passados diferentes (#923): fechada é atendimento
-  // encerrado, arquivada é o que saiu da fila de trabalho sem ser destruído.
-  { value: "archived", label: "Arquivadas" },
+  // Fork C&G: no lugar de "Arquivadas", "Todos" — toda conversa, na ordem do
+  // WhatsApp. O valor interno continua `archived` para não mexer na URL.
+  { value: "archived", label: "Todos" },
 ];
 
 /**
@@ -108,6 +107,8 @@ export interface InboxFiltersValue {
   chegouNoMes?: boolean;
   /** Fork Cavalcante & Guedes: só conversas em que o cliente mandou a última mensagem. */
   clienteFalouPorUltimo?: boolean;
+  /** Fork C&G: true = mais antigas primeiro; ausente = mais recentes primeiro. */
+  ordemAntigas?: boolean;
   /**
    * Só as conversas deste atendente (id do usuário). Filtro de GERENTE para cima;
    * ausente = todas. A aba Minhas já é "as minhas", então ali ele não vale.
@@ -590,6 +591,11 @@ export function InboxFilters({ value, onChange, filas: filasDaOrganizacao }: Pro
                 ativo: value.clienteFalouPorUltimo ?? false,
                 alternar: () =>
                   onChange({ ...value, clienteFalouPorUltimo: !value.clienteFalouPorUltimo }),
+              },
+              {
+                rotulo: value.ordemAntigas ? t("Mais antigas primeiro") : t("Mais recentes primeiro"),
+                ativo: value.ordemAntigas ?? false,
+                alternar: () => onChange({ ...value, ordemAntigas: !value.ordemAntigas }),
               },
               {
                 rotulo: t("Clientes"),

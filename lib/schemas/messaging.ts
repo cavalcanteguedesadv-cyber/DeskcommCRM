@@ -464,6 +464,8 @@ export const listConversationsQuerySchema = z.object({
    */
   chegou_no_mes: z.enum(["true"]).optional(),
   cliente_por_ultimo: z.enum(["true"]).optional(),
+  /** Fork C&G: ordem da lista pela última mensagem, em qualquer aba. Ausente = a régua da aba. */
+  ordem: z.enum(["recentes", "antigas"]).optional(),
   /**
    * O termo de busca. A régua inteira vive em `lib/inbox/termo-de-busca.ts`, e a
    * tela lê a MESMA — repetir aqui faria os dois divergirem, e a divergência
