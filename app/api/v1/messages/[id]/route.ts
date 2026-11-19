@@ -6,6 +6,7 @@ import { z } from "zod";
 import { fail, ok } from "@/lib/api/wrappers";
 import { audit } from "@/lib/audit";
 import { requireRole } from "@/lib/auth/require-role";
+import { roleAtLeast } from "@/lib/auth/types";
 import { requireSupportWrite } from "@/lib/impersonate/support";
 import {
   CHANNEL_SESSION_REF_COLUMNS,
@@ -49,8 +50,13 @@ async function alterar(req: NextRequest, ctx: Ctx, acao: "edit" | "revoke"): Pro
 
   // O WhatsApp só deixa o autor alterar uma mensagem própria. A UI esconde o
   // gesto dos demais, mas esta guarda no servidor impede chamar a rota à mão.
-  if (message.direction !== "outbound" || !["user", "crm"].includes(message.sent_via)
-    || message.sent_by_user_id !== authz.user.id || !message.external_id
+  // Fork C&G: o número é um só — o WhatsApp deixa alterar o que saiu pelo
+  // celular, pela IA ou por automação. Mensagem de colega, só quem gerencia.
+  const gerencia = roleAtLeast(authz.org.role, "manager");
+  const autorPermite = !message.sent_by_user_id || message.sent_by_user_id === authz.user.id || gerencia;
+  if (message.direction !== "outbound"
+    || !["user", "crm", "external_device", "ai", "automation"].includes(message.sent_via)
+    || !autorPermite || !message.external_id
     || message.revoked_at || !["sent", "delivered", "read"].includes(message.status)
     || (acao === "edit" && message.type !== "text")) {
     return fail("forbidden", t("Esta mensagem não pode ser alterada."), 403, { requestId });

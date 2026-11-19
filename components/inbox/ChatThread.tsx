@@ -111,6 +111,10 @@ export function ChatThread({
   const deleteNote = useDeleteNote(conversationId ?? "");
   const { editar, apagar, ocultar, restaurar, reenviar, reagir } = useAlterarMensagem(conversationId);
   const canManage = activeOrg != null && ROLE_RANK[activeOrg.role] >= ROLE_RANK.manager;
+  // Fork C&G: edita e apaga a própria mensagem, a que saiu pelo celular ou pela IA
+  // (sem autor no CRM) e, para quem gerencia, a de qualquer colega. A API confere de novo.
+  const podeAlterarEnviada = (autorId: string | null | undefined) =>
+    !autorId || autorId === currentUser.id || canManage;
   // Reenviar é envio: a rota exige `agent`, e quem só lê não ganha um botão que ela recusa.
   const podeEnviar = activeOrg != null && ROLE_RANK[activeOrg.role] >= ROLE_RANK.agent;
   const canalAlteraEnviada = transportaMensagem(provider)
@@ -365,10 +369,10 @@ export function ChatThread({
                   // CRM — inclusive nas do colega, porque `sent_via='user'` só
                   // registra que um humano digitou, nunca qual.
                   viewerUserId={currentUser.id}
-                  onEditar={canalAlteraEnviada && item.data.sent_by_user_id === currentUser.id
+                  onEditar={canalAlteraEnviada && podeAlterarEnviada(item.data.sent_by_user_id)
                     ? (text) => editar.mutateAsync({ id: item.data.id, text }).then(() => undefined)
                     : undefined}
-                  onApagar={canalAlteraEnviada && item.data.sent_by_user_id === currentUser.id
+                  onApagar={canalAlteraEnviada && podeAlterarEnviada(item.data.sent_by_user_id)
                     ? () => apagar.mutateAsync(item.data.id).then(() => undefined)
                     : undefined}
                   onOcultar={canManage && item.data.direction === "inbound"

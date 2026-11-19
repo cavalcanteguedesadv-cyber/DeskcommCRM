@@ -60,6 +60,17 @@ function msg(over: Partial<Message> = {}): Message {
   };
 }
 
+describe("MessageBubble — fork C&G: mensagem que saiu pelo celular", () => {
+  it("também oferece apagar para todos", async () => {
+    const user = userEvent.setup();
+    render(<MessageBubble message={msg({
+      external_id: "CEL1", sent_via: "external_device", sent_by_user_id: null, sent_at: new Date().toISOString(),
+    })} viewerUserId="usuario-1" onEditar={vi.fn(async () => undefined)} onApagar={vi.fn(async () => undefined)} />);
+    await user.click(screen.getByRole("button", { name: "Opções da mensagem" }));
+    expect(await screen.findByRole("menuitem", { name: "Apagar para todos" })).toBeInTheDocument();
+  });
+});
+
 describe("MessageBubble — ações sobre mensagem própria", () => {
   it("edita texto recente e confirma a exclusão para todos", async () => {
     const user = userEvent.setup();

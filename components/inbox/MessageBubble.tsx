@@ -208,6 +208,15 @@ export function MessageBubble({
     const timer = setInterval(() => setAgora(Date.now()), 60_000);
     return () => clearInterval(timer);
   }, []);
+  const caixaDeEdicaoRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    // Fork C&G: a caixa cresce com o texto (até metade da tela), como no
+    // WhatsApp, em vez de ficar em 5 linhas com barra de rolagem.
+    const el = caixaDeEdicaoRef.current;
+    if (!editando || !el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight + 2, Math.round(window.innerHeight * 0.5))}px`;
+  }, [editando, texto]);
   useEffect(() => {
     if (!editando) return;
     // O editor aumenta a altura da última bolha; sem rolar o fio, os botões
@@ -254,7 +263,9 @@ export function MessageBubble({
   const textoApagadoVisivel = apagada && textoDaApagadaApareceNaInbox(message.direction);
   const ocultaNoCrm = Boolean(message.metadata?.crm_hidden_at);
   const editada = Boolean(message.edited_at) && !apagada;
-  const enviadaPeloAtendente = isOutbound && ["user", "crm"].includes(message.sent_via)
+  // Fork C&G: o número é um só, então o WhatsApp deixa editar e apagar também o
+  // que saiu pelo celular, pela Vitória ou por automação — não só o digitado aqui.
+  const enviadaPeloAtendente = isOutbound && ["user", "crm", "external_device", "ai", "automation"].includes(message.sent_via)
     && Boolean(message.external_id) && !apagada
     && ["sent", "delivered", "read"].includes(message.status);
   const podeEditar = enviadaPeloAtendente && message.type === "text" && Boolean(message.body)
@@ -426,6 +437,9 @@ export function MessageBubble({
         data-testid="message-bubble"
         className={cn(
           "relative max-w-[75%] min-w-0 text-sm",
+          // Fork C&G: editando, a bolha abre quase na largura toda da conversa —
+          // a caixa estreita de 75% escondia o texto e obrigava a rolar.
+          editando && "w-full max-w-[92%]",
           isBareSticker
             ? "px-0 py-0"
             : cn(
@@ -589,7 +603,10 @@ export function MessageBubble({
 
         {editando ? (
           <div ref={editorRef} className="space-y-2">
+            <p className="text-xs font-medium opacity-80">{t("Editar mensagem")}</p>
             <textarea
+              ref={caixaDeEdicaoRef}
+              autoFocus
               aria-label={t("Editar mensagem")}
               value={texto}
               onChange={(event) => setTexto(event.target.value)}
@@ -604,7 +621,7 @@ export function MessageBubble({
                 }
               }}
               maxLength={4096}
-              className="min-h-20 w-full rounded-md border border-border bg-background p-2 text-base text-foreground md:text-sm"
+              className="min-h-24 w-full resize-y rounded-md border border-border bg-background p-3 text-base leading-relaxed text-foreground md:text-sm"
             />
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="ghost" disabled={ocupado} onClick={() => setEditando(false)}>{t("Cancelar")}</Button>
