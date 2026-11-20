@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
  *
  * Reusados pelo Route Handler REST e por MCP tools (S-13.03/04).
  */
+import { variantesDoTelefone } from "@/lib/busca/variantes-do-telefone";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { ApiError } from "@/lib/api/types";
@@ -327,6 +328,21 @@ export async function listConversationsHandler(
     query = query.gte("primeira_mensagem_em", inicioDoMesEm(FUSO_DO_ESCRITORIO, new Date()));
   }
   if (q.cliente_por_ultimo === "true") query = query.is("cliente_falou_por_ultimo", true);
+  if (q.etapa) {
+    // Fork C&G: conversas de contato com caso NESTA etapa do funil. A barreira
+    // de organização vale aqui também (admin client).
+    const { data: casos } = await supabase
+      .from("crm_leads")
+      .select("contact_id")
+      .eq("organization_id", ctx.organization_id)
+      .eq("stage_id", q.etapa)
+      .not("contact_id", "is", null)
+      .limit(1000);
+    const ids = idsQueCabemNaURL([
+      ...new Set(((casos ?? []) as { contact_id: string }[]).map((c) => c.contact_id)),
+    ]);
+    query = query.in("contact_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
+  }
 
   if (q.assigned_to === "me") {
     if (ctx.actor.type !== "user") {
@@ -443,6 +459,8 @@ export async function listConversationsHandler(
     // 4 dígitos é o piso: "12" casaria metade da base e devolveria a lista
     // inteira embaralhada — pior que não achar, porque PARECE que funcionou.
     const pareceTelefone = somenteDigitos.length >= 4;
+    // Fork C&G: com e sem o 9 depois do DDD (`lib/busca/variantes-do-telefone.ts`).
+    const formasDoTelefone = pareceTelefone ? variantesDoTelefone(somenteDigitos) : [];
 
     const camposDoContato = [
       // ─── O NOME DO CONTATO CASA SEM ACENTO (#3918) ────────────────────────
@@ -472,7 +490,7 @@ export async function listConversationsHandler(
       `busca_sem_acento.like.*${termoSemAcento(s)}*`,
       // O telefone tem OUTRO caminho: dígitos não têm acento, e o número é
       // comparado só por dígitos (o `somenteDigitos` descarta o resto).
-      ...(pareceTelefone ? [`phone_number.ilike.*${somenteDigitos}*`] : []),
+      ...formasDoTelefone.map((f) => `phone_number.ilike.*${f}*`),
     ].join(",");
 
     const { data: contatos } = await supabase
@@ -521,7 +539,7 @@ export async function listConversationsHandler(
         .eq("contacts.is_anonymized", false)
         .eq("contacts.is_personal", false)
         .is("contacts.is_merged_into", null)
-        .ilike("phone_number", `*${somenteDigitos}*`)
+        .or(formasDoTelefone.map((f) => `phone_number.ilike.*${f}*`).join(","))
         .limit(TETO_DE_CONTATOS_NA_BUSCA);
       idsDoExtra = ((extras ?? []) as { contact_id: string }[]).map((r) => r.contact_id);
     }

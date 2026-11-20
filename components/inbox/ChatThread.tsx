@@ -1,5 +1,7 @@
 "use client";
 
+import { nomeOriginalDoDocumento } from "@/components/inbox/media/media-utils";
+import { GaleriaDaConversa, type ItemDaGaleria } from "@/components/inbox/media/GaleriaDaConversa";
 import { useLocaleDeData } from "@/hooks/i18n/useLocaleDeData";
 
 import type { Locale } from "date-fns";
@@ -159,6 +161,22 @@ export function ChatThread({
    * melhor que segurar a conversa esperando por um texto de enfeite.
    */
   const porId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
+  // Fork C&G: fotos e PDFs da conversa, em ordem, para o visualizador passar de
+  // um para o outro como no WhatsApp.
+  const itensDaGaleria = useMemo<ItemDaGaleria[]>(
+    () =>
+      [...messages]
+        .sort((a, b) => a.sent_at.localeCompare(b.sent_at))
+        .flatMap((m): ItemDaGaleria[] => {
+          if (m.revoked_at || !(m.media_url || m.media_storage_path)) return [];
+          if (m.type === "image") return [{ id: m.id, tipo: "imagem", rotulo: t("Imagem") }];
+          if (m.type === "document" && (m.media_mime ?? "").includes("pdf")) {
+            return [{ id: m.id, tipo: "pdf", rotulo: nomeOriginalDoDocumento(m.metadata) ?? t("Documento PDF") }];
+          }
+          return [];
+        }),
+    [messages, t],
+  );
 
   const cartoes: CartaoDaPassagem[] = useMemo(
     () =>
@@ -285,6 +303,7 @@ export function ChatThread({
   }
 
   return (
+    <GaleriaDaConversa itens={itensDaGaleria}>
     <div {...sinalDoCanal} className="relative flex h-full min-h-0 min-w-0 flex-col">
       {termo && (
         <div className="px-4 py-1 text-xs text-muted-foreground" role="status">
@@ -403,5 +422,6 @@ export function ChatThread({
         </div>
       )}
     </div>
+    </GaleriaDaConversa>
   );
 }

@@ -104,6 +104,12 @@ interface Props {
   onDraftChange?: (text: string, mode: "reply" | "note") => void;
   active?: boolean;
   disabled?: boolean;
+  /**
+   * Fork C&G: conversa encerrada continua com a caixa livre — escrever e enviar
+   * reabre. Chamado uma vez antes do primeiro envio; quem chama decide se há o
+   * que reabrir.
+   */
+  antesDeEnviar?: () => Promise<unknown>;
   /** Set true when contact is blocked / anonymized — explanation shown. */
   blockedReason?: string | null;
   /**
@@ -182,6 +188,7 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
     active = true,
     onDraftChange,
     disabled,
+    antesDeEnviar,
     blockedReason,
     janelaFechada,
     aguardandoAssumir = false,
@@ -293,7 +300,22 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
     onDraftChange?.(text, mode);
   }, [text, mode, onDraftChange]);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
-  const send = useSendMessage();
+  const sendBase = useSendMessage();
+  // Fork C&G: em conversa encerrada, reabre antes de mandar. A mesma promessa
+  // serve a quem mandar enquanto a reabertura ainda está no ar.
+  const antesDeEnviarRef = useRef(antesDeEnviar);
+  antesDeEnviarRef.current = antesDeEnviar;
+  const reabrindoRef = useRef<Promise<unknown> | null>(null);
+  const mutateComReabertura: typeof sendBase.mutate = (variaveis, opcoes) => {
+    const reabrir = antesDeEnviarRef.current;
+    if (!reabrir) return sendBase.mutate(variaveis, opcoes);
+    reabrindoRef.current ??= reabrir().finally(() => { reabrindoRef.current = null; });
+    void reabrindoRef.current.then(
+      () => sendBase.mutate(variaveis, opcoes),
+      (erro: unknown) => opcoes?.onError?.(erro as never, variaveis, undefined as never, undefined as never),
+    );
+  };
+  const send = { ...sendBase, mutate: mutateComReabertura };
   const upload = useUploadMedia();
   const createNote = useCreateNote();
   const templates = useMessageTemplates();

@@ -116,6 +116,8 @@ export interface ConversationsFilters {
   cliente_por_ultimo?: boolean;
   /** Fork C&G: ordem da lista pela última mensagem. */
   ordem?: "recentes" | "antigas";
+  /** Fork C&G: etapa do funil. */
+  etapa?: string;
   channel_session_id?: string;
   /**
    * A FILA (#3876): só as conversas classificadas neste setor. O `set` da
@@ -205,6 +207,7 @@ export function useConversationsRealtime(
       if (filters.chegou_no_mes) qs.set("chegou_no_mes", "true");
       if (filters.cliente_por_ultimo) qs.set("cliente_por_ultimo", "true");
       if (filters.ordem) qs.set("ordem", filters.ordem);
+      if (filters.etapa) qs.set("etapa", filters.etapa);
       if (filters.channel_session_id) qs.set("channel_session_id", filters.channel_session_id);
       // A FILA (#3876) — ver o comentário do campo em `ConversationsFilters`.
       if (filters.sector_id) qs.set("sector_id", filters.sector_id);

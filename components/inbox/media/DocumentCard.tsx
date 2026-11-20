@@ -4,6 +4,7 @@ import { DownloadSimple, FileText } from "@/lib/ui/icons";
 import { cn } from "@/lib/utils";
 
 import { extensaoDoDocumento, formatBytes, mediaDownloadSrc, mediaSrc } from "./media-utils";
+import { useGaleriaDaConversa } from "./GaleriaDaConversa";
 
 interface Props {
   messageId: string;
@@ -48,6 +49,9 @@ export function DocumentCard({
   const label =
     nome ?? (extensao ? t("Documento {ext}").replace("{ext}", extensao) : t("Documento"));
   const tamanho = formatBytes(sizeBytes);
+  // Fork C&G: PDF da conversa abre no visualizador, na própria tela.
+  const galeria = useGaleriaDaConversa();
+  const naGaleria = !src && galeria?.temItem(messageId) === true;
   return (
     <div
       className={cn(
@@ -62,6 +66,11 @@ export function DocumentCard({
         target="_blank"
         rel="noreferrer"
         aria-label={`${label} (${tamanho})`}
+        onClick={(e) => {
+          if (!naGaleria || e.ctrlKey || e.metaKey) return;
+          e.preventDefault();
+          galeria!.abrir(messageId);
+        }}
         className="flex min-w-0 flex-1 items-center gap-3 p-2"
       >
         <span

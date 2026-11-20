@@ -37,6 +37,7 @@ import { useConversationCounts } from "@/hooks/inbox/useConversationCounts";
 import { useDepoisDeMontar } from "@/hooks/ui/useDepoisDeMontar";
 import { roleAtLeast, type Role, type VisibilityMode } from "@/lib/auth/types";
 import { SeletorDeAtendente } from "@/components/inbox/SeletorDeAtendente";
+import { SeletorDeEtapa } from "@/components/inbox/SeletorDeEtapa";
 import type { Sector } from "@/hooks/team/useSectors";
 
 export type InboxTab = "unassigned" | "mine" | "all" | "closed" | "archived" | "ai";
@@ -109,6 +110,8 @@ export interface InboxFiltersValue {
   clienteFalouPorUltimo?: boolean;
   /** Fork C&G: true = mais antigas primeiro; ausente = mais recentes primeiro. */
   ordemAntigas?: boolean;
+  /** Fork C&G: só conversas de contato com caso nesta etapa do funil. */
+  etapa?: string;
   /**
    * Só as conversas deste atendente (id do usuário). Filtro de GERENTE para cima;
    * ausente = todas. A aba Minhas já é "as minhas", então ali ele não vale.
@@ -824,6 +827,8 @@ export function InboxFilters({ value, onChange, filas: filasDaOrganizacao }: Pro
             )}
           </div>
         )}
+        {/* Fork C&G: filtro pelas colunas do funil. */}
+        <SeletorDeEtapa value={value.etapa} onChange={(etapa) => onChange({ ...value, etapa })} />
 
         {/* A FILA (#3876) ganha LINHA PRÓPRIA, e não a quarta cápsula da fileira
             de cima: aquela linha divide 280 px entre número, etiqueta e

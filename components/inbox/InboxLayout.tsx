@@ -14,6 +14,7 @@ import { JanelaFechadaAviso } from "@/components/inbox/JanelaFechadaAviso";
 import { NumeroForaDoAr } from "@/components/inbox/NumeroForaDoAr";
 import { useClaimConversation } from "@/hooks/inbox/useClaimConversation";
 import { useCloseConversation } from "@/hooks/inbox/useCloseConversation";
+import { useReabrirAoEnviar } from "@/hooks/inbox/useReabrirAoEnviar";
 import { useMarkAsRead } from "@/hooks/inbox/useMarkAsRead";
 import { gravarFiltrosLembrados, lerFiltrosLembrados } from "@/lib/inbox/filtros-lembrados";
 import {
@@ -485,6 +486,7 @@ export function InboxLayout({
       chegou_no_mes: filterValue.chegouNoMes || undefined,
       cliente_por_ultimo: filterValue.clienteFalouPorUltimo || undefined,
       ordem: filterValue.ordemAntigas ? "antigas" : "recentes",
+      etapa: filterValue.etapa,
       is_group: filterValue.onlyGroups || undefined,
     }),
     [
@@ -501,6 +503,7 @@ export function InboxLayout({
       filterValue.chegouNoMes,
       filterValue.clienteFalouPorUltimo,
       filterValue.ordemAntigas,
+      filterValue.etapa,
     ],
   );
 
@@ -588,6 +591,7 @@ export function InboxLayout({
 
   const claim = useClaimConversation();
   const close = useCloseConversation();
+  const reabrirAoEnviar = useReabrirAoEnviar();
   // Encaminhar (#2835): o gesto que abre a escolha do destino. A execução vira
   // um POST que reusa o caminho de envio do Inbox (ver o hook).
   const encaminhar = useEncaminharMensagem();
@@ -1173,7 +1177,13 @@ export function InboxLayout({
               conversationId={selectedConversation.id}
               blockedReason={supportReadonly ? "Acompanhamento somente leitura" : blockedReason}
               janelaFechada={motivoDaJanela}
-              disabled={selectedConversation.status === "closed"}
+              // Fork C&G: encerrada não trava a caixa — enviar reabre a conversa.
+              antesDeEnviar={selectedConversation.status === "closed"
+                ? () => reabrirAoEnviar.mutateAsync({
+                    conversation_id: selectedConversation.id,
+                    expected_revision: selectedConversation.service_revision,
+                  })
+                : undefined}
               // A CAIXA TRAVADA ATÉ ASSUMIR (#3012) — a opção é da ORGANIZAÇÃO e
               // chega pela mesma preferência que o menu (`interface_settings` em
               // `useAuth`). Desligada (o padrão) ninguém vê diferença: com ela

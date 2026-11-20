@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { MediaUnavailable } from "./MediaUnavailable";
 import { mediaSrc } from "./media-utils";
+import { useGaleriaDaConversa } from "./GaleriaDaConversa";
 
 interface Props {
   messageId: string;
@@ -36,6 +37,9 @@ export function ImageMedia({ messageId, alt, src: fonte }: Props) {
    */
   const [ampliada, setAmpliada] = useState(false);
   const src = fonte ?? mediaSrc(messageId);
+  // Fork C&G: dentro da conversa, abre o visualizador que passa de foto em foto.
+  const galeria = useGaleriaDaConversa();
+  const naGaleria = !fonte && galeria?.temItem(messageId) === true;
 
   const fechar = () => {
     setOpen(false);
@@ -55,7 +59,7 @@ export function ImageMedia({ messageId, alt, src: fonte }: Props) {
       <button
         type="button"
         aria-label={t("Ampliar imagem")}
-        onClick={() => setOpen(true)}
+        onClick={() => (naGaleria ? galeria!.abrir(messageId) : setOpen(true))}
         disabled={state !== "ready"}
         aria-disabled={state !== "ready"}
         className={cn(
