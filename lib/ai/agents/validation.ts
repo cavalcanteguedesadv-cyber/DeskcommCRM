@@ -45,6 +45,9 @@ const triggerConfigSchema = z
             // campo ao salvar e o aviso nunca liga pela tela. O teto é o mesmo
             // de TAMANHO_MAXIMO_DO_TEXTO em aviso-fora-do-horario.ts.
             notice: z.string().max(1000).nullable().optional(),
+            // Fork C&G: "fora" = o agente atende SÓ fora desta janela (a
+            // equipe atende dentro dela). Ausente = "dentro", como sempre foi.
+            modo: z.enum(["dentro", "fora"]).optional(),
           })
           .nullable()
           .optional()

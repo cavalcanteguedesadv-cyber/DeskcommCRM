@@ -41,6 +41,12 @@ export interface JanelaDeAtendimento {
   end: string;
   /** 0=domingo … 6=sábado, sem repetição, ao menos um. */
   weekdays: number[];
+  /**
+   * Fork C&G: `fora` inverte a régua — o agente atende só FORA da janela
+   * (noite, fim de semana) e fica calado dentro dela, sem adiar: dentro do
+   * horário quem atende é a equipe. Ausente = `dentro` (o de sempre).
+   */
+  modo?: 'dentro' | 'fora';
 }
 
 const HORA_RX = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
@@ -62,11 +68,12 @@ export function lerJanelaDeAtendimento(triggerConfig: unknown): JanelaDeAtendime
   const bh = (filters as { business_hours?: unknown }).business_hours;
   if (typeof bh !== 'object' || bh === null) return null;
 
-  const { timezone, start, end, weekdays } = bh as {
+  const { timezone, start, end, weekdays, modo } = bh as {
     timezone?: unknown;
     start?: unknown;
     end?: unknown;
     weekdays?: unknown;
+    modo?: unknown;
   };
   if (typeof timezone !== 'string' || timezone.trim() === '') return null;
   if (typeof start !== 'string' || typeof end !== 'string') return null;
@@ -94,7 +101,9 @@ export function lerJanelaDeAtendimento(triggerConfig: unknown): JanelaDeAtendime
     return null;
   }
 
-  return { timezone, start, end, weekdays: dias };
+  return modo === 'fora'
+    ? { timezone, start, end, weekdays: dias, modo: 'fora' }
+    : { timezone, start, end, weekdays: dias };
 }
 
 /** Dia da semana (0–6) e minutos desde a meia-noite NO FUSO da janela. */

@@ -2744,6 +2744,7 @@ export const DICIONARIO: Traducoes = {
   "Filtrar por etapa do funil": { es: "Filtrar por etapa del embudo" },
   "Todas as etapas do funil": { es: "Todas las etapas del embudo" },
   "{n} de {total}": { es: "{n} de {total}" },
+  "Atender só FORA deste horário (a equipe atende dentro dele)": { es: "Atender solo FUERA de este horario (el equipo atiende dentro de él)" },
   "Documento PDF": { es: "Documento PDF" },
   "Mais recentes primeiro": { es: "Más recientes primero" },
   Publicado: { es: "Publicado" },

@@ -21,6 +21,8 @@ export interface BusinessHoursValue {
   start: string;
   end: string;
   weekdays: number[];
+  /** Fork C&G: "fora" = o agente atende só fora desta janela. */
+  modo?: "dentro" | "fora";
   /**
    * Aviso de fora do horário (#1926) — texto fixo enviado NA HORA quando o
    * cliente escreve fora da janela, uma vez por contato por período fechado.
@@ -515,6 +517,16 @@ export function TriggerEditor({ value, onChange, disabled, organizationTimezone,
         </div>
         {bh ? (
           <div className="space-y-2">
+            {/* Fork C&G: inverter a janela — o agente cobre a noite e o fim de semana. */}
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={bh.modo === "fora"}
+                onCheckedChange={(fora) => patchBh({ modo: fora ? "fora" : undefined })}
+                disabled={disabled}
+                id="bh_fora"
+              />
+              <Label htmlFor="bh_fora">{t("Atender só FORA deste horário (a equipe atende dentro dele)")}</Label>
+            </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="space-y-1">
                 <Label htmlFor="bh_tz">{t("Fuso horário")}</Label>

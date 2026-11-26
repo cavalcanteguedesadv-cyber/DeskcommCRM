@@ -3626,7 +3626,18 @@ async function executarTurnoDoAgente(
   // Adia, não descarta: o job volta a 'pending' na abertura, SEM consumir
   // attempts (`rescheduleJob`) — quem escreveu 22h é atendido às 8h. O throw é
   // o contrato de `JobSettledError`: o run já dispôs do job, main.ts no-opa.
-  if (!preview && liveJob().kind === 'inbound_turn' && agentConfig?.janelaDeAtendimento != null) {
+  // Fork C&G: modo "fora" — o agente atende só fora do horário comercial.
+  // Dentro da janela o turno é PULADO (sem adiar, sem aviso): a mensagem fica
+  // na Entrada para a equipe. Fora dela o turno segue normalmente.
+  if (!preview && liveJob().kind === 'inbound_turn' && agentConfig?.janelaDeAtendimento?.modo === 'fora') {
+    if (msAteAJanelaAbrir(agentConfig.janelaDeAtendimento, clock()) === null) {
+      runLog.info('turno pulado — dentro do horário comercial, quem atende é a equipe (modo fora do horário)', {
+        agent_id: agentConfig.agentId,
+        janela: `${agentConfig.janelaDeAtendimento.start}-${agentConfig.janelaDeAtendimento.end}`,
+      });
+      return;
+    }
+  } else if (!preview && liveJob().kind === 'inbound_turn' && agentConfig?.janelaDeAtendimento != null) {
     const esperaMs = msAteAJanelaAbrir(agentConfig.janelaDeAtendimento, clock());
     if (esperaMs !== null) {
       // O AVISO DE FORA DO HORÁRIO (#1926) — ANTES do adiamento, para sair na
